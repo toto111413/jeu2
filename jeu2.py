@@ -1,44 +1,38 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 import random
 
-st.title("🎯 Jeu : Trouve la cible")
+st.subheader("🎯 Jeu : Trouve la cible (version sans module externe)")
 
-# Dimensions
-width, height = 10, 8
+# Dimensions de la grille
+width, height = 8, 6
 
-# Position cible
-if "target" not in st.session_state:
-    st.session_state.target = (random.randint(1, width-1), random.randint(1, height-1))
-    st.session_state.score = 0
+# Initialisation de la position et du score
+if "target_pos" not in st.session_state:
+    st.session_state.target_pos = (random.randint(0, width-1), random.randint(0, height-1))
+    st.session_state.score_simple = 0
 
-# Clic simulé via sélection coordonnée
-x_click = st.slider("Position X", 0, width, 0)
-y_click = st.slider("Position Y", 0, height, 0)
+# Choix du joueur
+x_choice = st.slider("Position X", 0, width-1, 0, key="x_choice")
+y_choice = st.slider("Position Y", 0, height-1, 0, key="y_choice")
 
-if st.button("Tirer"):
-    if (x_click, y_click) == st.session_state.target:
+# Bouton pour tirer
+if st.button("Tirer 🎯", key="tir_simple"):
+    if (x_choice, y_choice) == st.session_state.target_pos:
         st.success("🎯 Touché ! +1 point")
-        st.session_state.score += 1
-        st.session_state.target = (random.randint(1, width-1), random.randint(1, height-1))
+        st.session_state.score_simple += 1
+        st.session_state.target_pos = (random.randint(0, width-1), random.randint(0, height-1))
     else:
         st.warning("Raté...")
 
-# Affichage graphique
-fig, ax = plt.subplots()
-ax.set_xlim(0, width)
-ax.set_ylim(0, height)
-ax.set_xticks(range(width+1))
-ax.set_yticks(range(height+1))
-ax.grid(True)
+# Affichage de la grille avec émojis
+for y in range(height):
+    cols = st.columns(width)
+    for x in range(width):
+        if (x, y) == st.session_state.target_pos:
+            cols[x].markdown("🎯", unsafe_allow_html=True)
+        elif (x, y) == (x_choice, y_choice):
+            cols[x].markdown("❌", unsafe_allow_html=True)
+        else:
+            cols[x].markdown("⬜", unsafe_allow_html=True)
 
-# Cible
-ax.plot(st.session_state.target[0], st.session_state.target[1], "ro", markersize=15)
-# Tir
-ax.plot(x_click, y_click, "bx", markersize=10)
-
-st.pyplot(fig)
-
-st.write(f"Score : {st.session_state.score}")
-
-
+st.write(f"Score : {st.session_state.score_simple}")
